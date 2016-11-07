@@ -11,85 +11,38 @@
 
 #include <iostream>
 #include <thread>
-#include <queue>
+#include <list>
+#include <future>
 
 class Runnable {
     using Task = std::function<void()>;
     
 public:
-    Runnable() {
-        thread = std::unique_ptr<std::thread>( new std::thread( [&] {
-            this->Run();
-        } ) );
-    }
+    Runnable() { }
     
     void Execute( Task task ) {
-        waitingTasks.push( task );
+        futures.push_back( std::async( task ) );
     }
     
     bool TaskCompleted() {
-        return !thread->joinable();
+        std::for_each( std::begin( futures ), std::end( futures ), [&] ( auto &f ) {
+            return false;
+        } );
+        return true;
     }
     
     virtual ~Runnable() {
-        Execute( [&] {
-            done = true;
-            std::cout << "Finishing\n";
+        std::for_each( std::begin( futures ), std::end( futures ), [&] ( auto &f ) {
+            f.get();
         } );
-        if( thread->joinable() ) {
-            thread->join();
-        }
-    }
-    
-    void Run() {
-        done = false;
-        while( !done ) {
-            if( !waitingTasks.empty() ) {
-                auto t = waitingTasks.front();
-                t();
-            }
-        }
     }
     
     Runnable( const Runnable & ) = delete;
     void operator=( const Runnable & ) = delete;
     
 protected:
-    std::unique_ptr<std::thread> thread;
-    std::queue<Task> waitingTasks;
-    bool done{false};
+    std::list<std::future<void>> futures;
 };
 
-//class Runnable {
-//    using Task = std::function<void()>;
-//    
-//public:
-//    Runnable() {
-//        thread = std::unique_ptr<std::thread>( new std::thread(  ) );
-//    }
-//    
-//    void Execute( Task task ) {
-//        if( thread->joinable() ) {
-//            thread->join();
-//        }
-//        thread = std::make_unique<std::thread>( task );
-//    }
-//    
-//    bool TaskCompleted() {
-//        return !thread->joinable();
-//    }
-//    
-//    virtual ~Runnable() {
-//        if( thread->joinable() )
-//            thread->join();
-//    }
-//    
-//    Runnable( const Runnable & ) = delete;
-//    void operator=( const Runnable & ) = delete;
-//    
-//protected:
-//    std::unique_ptr<std::thread> thread;
-//    
-//};
 
 #endif /* Runnable_h */
