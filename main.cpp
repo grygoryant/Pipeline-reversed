@@ -83,7 +83,8 @@ int main(int argc, const char * argv[]) {
     //}
     
     while( !os->TaskCompleted() );
-
+    
+    std::cout << "Finished!\n";
 //	//is -> bmq1 -> ios1 -> bmq2 -> ios2 -> bmq3 -> os
 //    auto mbmq1 = std::make_shared<MessageBMQType>( );
 //	auto mbmq2 = std::make_shared<MessageBMQType>( );
