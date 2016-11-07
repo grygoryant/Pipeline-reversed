@@ -10,7 +10,6 @@
 #define Runnable_h
 
 #include <iostream>
-#include <thread>
 #include <list>
 #include <future>
 
@@ -24,12 +23,12 @@ public:
         futures.push_back( std::async( task ) );
     }
     
-    bool TaskCompleted() {
-        std::for_each( std::begin( futures ), std::end( futures ), [&] ( auto &f ) {
-            return false;
-        } );
-        return true;
-    }
+//    bool TasksCompleted() {
+//        std::for_each( std::begin( futures ), std::end( futures ), [&] ( auto &f ) {
+//            return f.wait_for(std::chrono::seconds(0)) != std::future_status::ready;
+//        } );
+//        return true;
+//    }
     
     virtual ~Runnable() {
         std::for_each( std::begin( futures ), std::end( futures ), [&] ( auto &f ) {
